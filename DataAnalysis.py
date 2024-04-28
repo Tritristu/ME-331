@@ -2,10 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from os import listdir
-from scipy.stats import linregress
 
 # Constants
-
 # Squares are [length,width,height] and circles are [length,diameter]
 dimensionsCuSq = 1e-2*np.array([28.5,1.27,1.27]) # m
 dimensionsCuCirc = 1e-2*np.array([17.2,1.27]) # m
@@ -93,3 +91,25 @@ print(convectionCuSq)
 print(convectionCuCirc)
 print(convectionFeCirc)
 print(convectionAlCirc)
+
+# Fin Heat Transfer Rates
+def heatTransferRates(tempBase,exTemps,convectiveCoeff,conductivity,dimensions,circle):
+    if circle:
+        perimeter = np.pi*dimensions[1]
+        areaCS = np.pi*(dimensions[1]/2)**2
+    else:
+        perimeter = 2*(dimensions[1] + dimensions[2])
+        areaCS = dimensions[1]*dimensions[2]
+
+    baseExcessTemp = tempBase - exTemps[len(exTemps)-1]
+    m = np.sqrt(convectiveCoeff*perimeter/(conductivity*areaCS))
+    M = baseExcessTemp*np.sqrt(convectiveCoeff*perimeter*conductivity*areaCS)
+    numerator = np.sinh(m*dimensions[0]) + (convectiveCoeff/(m*conductivity))*np.sinh(m*dimensions[0])
+    denominator = np.cosh(m*dimensions[0]) + (convectiveCoeff/(m*conductivity))*np.sinh(m*dimensions[0])
+
+    return M*numerator/denominator
+
+heatTransferCuSq = heatTransferRates(tempBaseCuSq,CuSquareTemps,convectionCuSq,conductivityCu,dimensionsCuSq,circle=False)
+heatTransferCuCirc = heatTransferRates(tempBaseCuCirc,CuCircTemps,convectionCuCirc,conductivityCu,dimensionsCuCirc,circle=True)
+heatTransferAlCirc = heatTransferRates(tempBaseAlCirc,AlCircTemps,convectionAlCirc,conductivityAl,dimensionsAlCirc,circle=True)
+heatTransferFeCirc = heatTransferRates(tempBaseFeCirc,FeCircTemps,convectionFeCirc,conductivityFe,dimensionsFeCirc,circle=True)
