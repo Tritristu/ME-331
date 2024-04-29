@@ -20,10 +20,10 @@ tempBaseFeCirc = 87 # Centigrade
 tempBaseAlCirc = 91 # Centigrade
 
 # Distance from the base
-positionsCuSq = 1e-2*np.array([3.06,5.5,9.82,17.15,22.07,28.07]) # m
-positionsCuCirc = 1e-2*np.array([3.09,5.56,9.8,17.15]) # m
-positionsFeCirc = 1e-2*np.array([3.1,5.44,9.81,17.22,22.07,28.45]) # m
-positionsAlCirc = 1e-2*np.array([4.35,5.41,9.72,17.15,22.07,28.07]) # m
+positionsCuSq = 1e-2*np.array([0,3.06,5.5,9.82,17.15,22.07,28.07]) # m
+positionsCuCirc = 1e-2*np.array([0,3.09,5.56,9.8,17.15]) # m
+positionsFeCirc = 1e-2*np.array([0,3.1,5.44,9.81,17.22,22.07,28.45]) # m
+positionsAlCirc = 1e-2*np.array([0,4.35,5.41,9.72,17.15,22.07,28.07]) # m
 
 # Loading in Data
 Files = [x for x in listdir() if '.csv' in x]
@@ -64,10 +64,10 @@ def normExcessTempAna(position,convectiveCoeff,conductivity,dimensions,circle):
 
     return numerator/denominator
 
-def convectiveCalc(positions,exTemps,range,tempBase,conductivity,dimensions,circle):
+def convectiveCalc(positions,exTemps,range,conductivity,dimensions,circle):
     bestError = 1e9
     convectiveCoeff = -1
-    baseExcessTemp = tempBase - exTemps[len(exTemps)-1]
+    baseExcessTemp = exTemps[0] - exTemps[len(exTemps)-1]
     excessTemp = np.array(exTemps) - exTemps[len(exTemps)-1]
     normExcessTemp = excessTemp/baseExcessTemp
 
@@ -82,10 +82,10 @@ def convectiveCalc(positions,exTemps,range,tempBase,conductivity,dimensions,circ
     
     return convectiveCoeff
 
-convectionCuSq = convectiveCalc(positionsCuSq,CuSquareTemps,[0.1,100,1],tempBaseCuSq,conductivityCu,dimensionsCuSq,circle=False)
-convectionCuCirc = convectiveCalc(positionsCuCirc,CuCircTemps,[0.1,100,1],tempBaseCuCirc,conductivityCu,dimensionsCuCirc,circle=True)
-convectionFeCirc = convectiveCalc(positionsFeCirc,FeCircTemps,[0.1,100,1],tempBaseFeCirc,conductivityFe,dimensionsFeCirc,circle=True)
-convectionAlCirc = convectiveCalc(positionsAlCirc,AlCircTemps,[0.1,100,1],tempBaseAlCirc,conductivityAl,dimensionsAlCirc,circle=True)
+convectionCuSq = convectiveCalc(positionsCuSq,CuSquareTemps,[0.01,200,0.01],conductivityCu,dimensionsCuSq,circle=False)
+convectionCuCirc = convectiveCalc(positionsCuCirc,CuCircTemps,[0.01,200,0.01],conductivityCu,dimensionsCuCirc,circle=True)
+convectionFeCirc = convectiveCalc(positionsFeCirc,FeCircTemps,[0.01,200,0.01],conductivityFe,dimensionsFeCirc,circle=True)
+convectionAlCirc = convectiveCalc(positionsAlCirc,AlCircTemps,[0.01,200,0.01],conductivityAl,dimensionsAlCirc,circle=True)
 
 print(convectionCuSq)
 print(convectionCuCirc)
@@ -93,7 +93,7 @@ print(convectionFeCirc)
 print(convectionAlCirc)
 
 # Fin Heat Transfer Rates
-def heatTransferRates(tempBase,exTemps,convectiveCoeff,conductivity,dimensions,circle):
+def heatTransferRates(exTemps,convectiveCoeff,conductivity,dimensions,circle):
     if circle:
         perimeter = np.pi*dimensions[1]
         areaCS = np.pi*(dimensions[1]/2)**2
@@ -101,7 +101,7 @@ def heatTransferRates(tempBase,exTemps,convectiveCoeff,conductivity,dimensions,c
         perimeter = 2*(dimensions[1] + dimensions[2])
         areaCS = dimensions[1]*dimensions[2]
 
-    baseExcessTemp = tempBase - exTemps[len(exTemps)-1]
+    baseExcessTemp = exTemps[0] - exTemps[len(exTemps)-1]
     m = np.sqrt(convectiveCoeff*perimeter/(conductivity*areaCS))
     M = baseExcessTemp*np.sqrt(convectiveCoeff*perimeter*conductivity*areaCS)
     numerator = np.sinh(m*dimensions[0]) + (convectiveCoeff/(m*conductivity))*np.sinh(m*dimensions[0])
@@ -109,21 +109,38 @@ def heatTransferRates(tempBase,exTemps,convectiveCoeff,conductivity,dimensions,c
 
     return M*numerator/denominator
 
-heatTransferCuSq = heatTransferRates(tempBaseCuSq,CuSquareTemps,convectionCuSq,conductivityCu,dimensionsCuSq,circle=False)
-heatTransferCuCirc = heatTransferRates(tempBaseCuCirc,CuCircTemps,convectionCuCirc,conductivityCu,dimensionsCuCirc,circle=True)
-heatTransferAlCirc = heatTransferRates(tempBaseAlCirc,AlCircTemps,convectionAlCirc,conductivityAl,dimensionsAlCirc,circle=True)
-heatTransferFeCirc = heatTransferRates(tempBaseFeCirc,FeCircTemps,convectionFeCirc,conductivityFe,dimensionsFeCirc,circle=True)
+heatTransferCuSq = heatTransferRates(CuSquareTemps,convectionCuSq,conductivityCu,dimensionsCuSq,circle=False)
+heatTransferCuCirc = heatTransferRates(CuCircTemps,convectionCuCirc,conductivityCu,dimensionsCuCirc,circle=True)
+heatTransferAlCirc = heatTransferRates(AlCircTemps,convectionAlCirc,conductivityAl,dimensionsAlCirc,circle=True)
+heatTransferFeCirc = heatTransferRates(FeCircTemps,convectionFeCirc,conductivityFe,dimensionsFeCirc,circle=True)
 
 
 plt.figure(1)
-plt.plot(np.concatenate((np.array([0]),positionsCuSq)),np.concatenate((np.array([tempBaseCuSq]),CuSquareTemps[0:len(positionsCuSq)])),'b',label='Copper Square')
-plt.plot(np.concatenate((np.array([0]),positionsCuCirc)),np.concatenate((np.array([tempBaseCuCirc]),CuCircTemps[0:len(positionsCuCirc)])),'r',label='Copper Round')
-plt.plot(np.concatenate((np.array([0]),positionsAlCirc)),np.concatenate((np.array([tempBaseAlCirc]),AlCircTemps[0:len(positionsAlCirc)])),'g',label='Aluminum Round')
-plt.plot(np.concatenate((np.array([0]),positionsFeCirc)),np.concatenate((np.array([tempBaseFeCirc]),FeCircTemps[0:len(positionsFeCirc)])),'m',label='Stainless Steel Round')
+plt.plot(positionsCuSq,CuSquareTemps[0:len(positionsCuSq)],'bo-',label='Copper Square')
 plt.xlim([0,dimensionsCuSq[0]])
 plt.ylim([0,100])
 plt.ylabel('Temperature (Centigrade)')
 plt.xlabel('Position (m)')
-plt.legend()
+
+plt.figure(2)
+plt.plot(positionsCuCirc,CuCircTemps[0:len(positionsCuCirc)],'bo-',label='Copper Round')
+plt.xlim([0,dimensionsCuCirc[0]])
+plt.ylim([0,60])
+plt.ylabel('Temperature (Centigrade)')
+plt.xlabel('Position (m)')
+
+plt.figure(3)
+plt.plot(positionsAlCirc,AlCircTemps[0:len(positionsAlCirc)],'bo-',label='Aluminum Round')
+plt.xlim([0,dimensionsAlCirc[0]])
+plt.ylim([0,60])
+plt.ylabel('Temperature (Centigrade)')
+plt.xlabel('Position (m)')
+
+plt.figure(4)
+plt.plot(positionsFeCirc,FeCircTemps[0:len(positionsFeCirc)],'bo-',label='Stainless Steel Round')
+plt.xlim([0,dimensionsFeCirc[0]])
+plt.ylim([0,60])
+plt.ylabel('Temperature (Centigrade)')
+plt.xlabel('Position (m)')
 
 plt.show()
