@@ -71,7 +71,7 @@ def convectiveCalc(positions,exTemps,range,tempBase,conductivity,dimensions,circ
     excessTemp = np.array(exTemps) - exTemps[len(exTemps)-1]
     normExcessTemp = excessTemp/baseExcessTemp
 
-    for convection in np.arange(range[0],range[1],1):
+    for convection in np.arange(range[0],range[1],range[2]):
         errorLeastSquares = 0
         for i,position in enumerate(positions):
             error = (normExcessTemp[i] - normExcessTempAna(position,convection,conductivity,dimensions,circle))**2
@@ -82,10 +82,10 @@ def convectiveCalc(positions,exTemps,range,tempBase,conductivity,dimensions,circ
     
     return convectiveCoeff
 
-convectionCuSq = convectiveCalc(positionsCuSq,CuSquareTemps,[0.1,20],tempBaseCuSq,conductivityCu,dimensionsCuSq,circle=False)
-convectionCuCirc = convectiveCalc(positionsCuCirc,CuCircTemps,[0.1,20],tempBaseCuCirc,conductivityCu,dimensionsCuCirc,circle=True)
-convectionFeCirc = convectiveCalc(positionsFeCirc,FeCircTemps,[0.1,20],tempBaseFeCirc,conductivityFe,dimensionsFeCirc,circle=True)
-convectionAlCirc = convectiveCalc(positionsAlCirc,AlCircTemps,[0.1,20],tempBaseAlCirc,conductivityAl,dimensionsAlCirc,circle=True)
+convectionCuSq = convectiveCalc(positionsCuSq,CuSquareTemps,[0.1,100,1],tempBaseCuSq,conductivityCu,dimensionsCuSq,circle=False)
+convectionCuCirc = convectiveCalc(positionsCuCirc,CuCircTemps,[0.1,100,1],tempBaseCuCirc,conductivityCu,dimensionsCuCirc,circle=True)
+convectionFeCirc = convectiveCalc(positionsFeCirc,FeCircTemps,[0.1,100,1],tempBaseFeCirc,conductivityFe,dimensionsFeCirc,circle=True)
+convectionAlCirc = convectiveCalc(positionsAlCirc,AlCircTemps,[0.1,100,1],tempBaseAlCirc,conductivityAl,dimensionsAlCirc,circle=True)
 
 print(convectionCuSq)
 print(convectionCuCirc)
@@ -113,3 +113,17 @@ heatTransferCuSq = heatTransferRates(tempBaseCuSq,CuSquareTemps,convectionCuSq,c
 heatTransferCuCirc = heatTransferRates(tempBaseCuCirc,CuCircTemps,convectionCuCirc,conductivityCu,dimensionsCuCirc,circle=True)
 heatTransferAlCirc = heatTransferRates(tempBaseAlCirc,AlCircTemps,convectionAlCirc,conductivityAl,dimensionsAlCirc,circle=True)
 heatTransferFeCirc = heatTransferRates(tempBaseFeCirc,FeCircTemps,convectionFeCirc,conductivityFe,dimensionsFeCirc,circle=True)
+
+
+plt.figure(1)
+plt.plot(np.concatenate((np.array([0]),positionsCuSq)),np.concatenate((np.array([tempBaseCuSq]),CuSquareTemps[0:len(positionsCuSq)])),'b',label='Copper Square')
+plt.plot(np.concatenate((np.array([0]),positionsCuCirc)),np.concatenate((np.array([tempBaseCuCirc]),CuCircTemps[0:len(positionsCuCirc)])),'r',label='Copper Round')
+plt.plot(np.concatenate((np.array([0]),positionsAlCirc)),np.concatenate((np.array([tempBaseAlCirc]),AlCircTemps[0:len(positionsAlCirc)])),'g',label='Aluminum Round')
+plt.plot(np.concatenate((np.array([0]),positionsFeCirc)),np.concatenate((np.array([tempBaseFeCirc]),FeCircTemps[0:len(positionsFeCirc)])),'m',label='Stainless Steel Round')
+plt.xlim([0,dimensionsCuSq[0]])
+plt.ylim([0,100])
+plt.ylabel('Temperature (Centigrade)')
+plt.xlabel('Position (m)')
+plt.legend()
+
+plt.show()
