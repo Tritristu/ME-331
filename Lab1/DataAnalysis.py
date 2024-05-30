@@ -82,15 +82,15 @@ def convectiveCalc(positions,exTemps,range,conductivity,dimensions,circle):
     
     return convectiveCoeff
 
-convectionCuSq = convectiveCalc(positionsCuSq,CuSquareTemps,[0.01,200,0.01],conductivityCu,dimensionsCuSq,circle=False)
-convectionCuCirc = convectiveCalc(positionsCuCirc,CuCircTemps,[0.01,200,0.01],conductivityCu,dimensionsCuCirc,circle=True)
-convectionFeCirc = convectiveCalc(positionsFeCirc,FeCircTemps,[0.01,200,0.01],conductivityFe,dimensionsFeCirc,circle=True)
-convectionAlCirc = convectiveCalc(positionsAlCirc,AlCircTemps,[0.01,200,0.01],conductivityAl,dimensionsAlCirc,circle=True)
+convectionCuSq = convectiveCalc(positionsCuSq,CuSquareTemps,[0.01,20,0.01],conductivityCu,dimensionsCuSq,circle=False)
+convectionCuCirc = convectiveCalc(positionsCuCirc,CuCircTemps,[0.01,20,0.01],conductivityCu,dimensionsCuCirc,circle=True)
+convectionFeCirc = convectiveCalc(positionsFeCirc,FeCircTemps,[0.01,20,0.01],conductivityFe,dimensionsFeCirc,circle=True)
+convectionAlCirc = convectiveCalc(positionsAlCirc,AlCircTemps,[0.01,20,0.01],conductivityAl,dimensionsAlCirc,circle=True)
 
-print(convectionCuSq)
-print(convectionCuCirc)
-print(convectionFeCirc)
-print(convectionAlCirc)
+# print(convectionCuSq)
+# print(convectionCuCirc)
+# print(convectionFeCirc)
+# print(convectionAlCirc)
 
 # Fin Heat Transfer Rates
 def heatTransferRates(exTemps,convectiveCoeff,conductivity,dimensions,circle):
@@ -114,11 +114,15 @@ heatTransferCuCirc = heatTransferRates(CuCircTemps,convectionCuCirc,conductivity
 heatTransferAlCirc = heatTransferRates(AlCircTemps,convectionAlCirc,conductivityAl,dimensionsAlCirc,circle=True)
 heatTransferFeCirc = heatTransferRates(FeCircTemps,convectionFeCirc,conductivityFe,dimensionsFeCirc,circle=True)
 
+print(heatTransferCuSq)
+print(heatTransferCuCirc)
+print(heatTransferAlCirc)
+print(heatTransferFeCirc)
 
 plt.figure(1)
 plt.plot(positionsCuSq,CuSquareTemps[0:len(positionsCuSq)],'bo-',label='Copper Square')
 plt.xlim([0,dimensionsCuSq[0]])
-plt.ylim([0,100])
+plt.ylim([0,60])
 plt.ylabel('Temperature (Centigrade)')
 plt.xlabel('Position (m)')
 
@@ -142,5 +146,28 @@ plt.xlim([0,dimensionsFeCirc[0]])
 plt.ylim([0,60])
 plt.ylabel('Temperature (Centigrade)')
 plt.xlabel('Position (m)')
+
+plt.figure()
+x = np.linspace(0,5,500)
+meanTemp = lambda x : 17.022*x
+meanTemps = meanTemp(x)
+plt.figure()
+plt.plot(x,meanTemps,'b')
+plt.xlim([0,5])
+# plt.ylim([0,60])
+plt.ylabel('Heat Transfer Coefficient (W/mK)')
+plt.xlabel('Position (m)')
+plt.title("Heat Transfer Coefficient vs Position")
+
+
+
+
+
+
+
+
+
+
+
 
 plt.show()
