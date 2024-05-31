@@ -31,16 +31,17 @@ thermalConductivityCuBlk = 401 # W/m*K
 thermalConductivityCuGld = 401 # W/m*K
 thermalConductivityRubber = 0.16 # W/m*K
 
-emissitivity = 0.03
+emissitivityCuBlk = 0.98
+emissitivityCuGld = 0.03
 
 sigma = 5.670374419e-8 # W/(m^2 * K^4)
 
 # Loading in Data
-Files = [x for x in listdir('Lab 2') if '.csv' in x]
+Files = [x for x in listdir('Lab2') if '.csv' in x]
 
 Data = {x:{} for x in Files}
 for File in Files:
-    Data[File] = pd.read_csv(f'Lab 2\\{File}')
+    Data[File] = pd.read_csv(f'Lab2\\{File}')
 
 # Index
 # 0 = CopperBlack
@@ -184,11 +185,11 @@ Data[Files[1]]['Convective coefficient'] = Data[Files[0]]['Nusselt Number']*Data
 
 # Calculate convective heat transfer
 Data[Files[0]]['Convective HT'] = Data[Files[0]]['Convective coefficient']*surfaceAreaCuBlk*(Data[Files[0]]['specimen']-Data[Files[0]]['air'])
-Data[Files[1]]['Convective HT'] = Data[Files[1]]['Convective coefficient']*surfaceAreaCuBlk*(Data[Files[1]]['specimen']-Data[Files[1]]['air'])
+Data[Files[1]]['Convective HT'] = Data[Files[1]]['Convective coefficient']*surfaceAreaCuGld*(Data[Files[1]]['specimen']-Data[Files[1]]['air'])
 
 # Calculate radiative heat transfer
-Data[Files[0]]['Radiative HT'] = emissitivity*sigma*(Data[Files[0]]['specimen']**4 - Data[Files[0]]['air']**4)
-Data[Files[1]]['Radiative HT'] = emissitivity*sigma*(Data[Files[1]]['specimen']**4 - Data[Files[1]]['air']**4)
+Data[Files[0]]['Radiative HT'] = emissitivityCuBlk*sigma*surfaceAreaCuBlk*(Data[Files[0]]['specimen']**4 - Data[Files[0]]['air']**4)
+Data[Files[1]]['Radiative HT'] = emissitivityCuGld*sigma*surfaceAreaCuGld*(Data[Files[1]]['specimen']**4 - Data[Files[1]]['air']**4)
 
 # Calculate total heat transfer using sum of components
 Data[Files[0]]['Sum HT'] = Data[Files[0]]['Convective HT'] + Data[Files[0]]['Radiative HT']
@@ -221,7 +222,7 @@ plt.plot(Data[Files[0]]['Film Temperature'],Data[Files[0]]['Effective HT'],'g')
 plt.xlim([295,335])
 plt.ylim([0,5])
 plt.xlabel('Film Temperature (K)')
-plt.ylabel(r'Heat transfer rate $\left(\frac{W}{m^2}\right)$')
+plt.ylabel(r'Heat transfer rate $\left(W\right)$')
 
 plt.figure(10)
 plt.plot(Data[Files[1]]['Film Temperature'],Data[Files[1]]['Convective HT'],'b')
@@ -231,6 +232,6 @@ plt.plot(Data[Files[1]]['Film Temperature'],Data[Files[1]]['Effective HT'],'g')
 plt.xlim([295,335])
 plt.ylim([0,5])
 plt.xlabel('Film Temperature (K)')
-plt.ylabel(r'Heat transfer rate $\left(\frac{W}{m^2}\right)$')
+plt.ylabel(r'Heat transfer rate $\left(W\right)$')
 
-plt.show()
+# plt.show()
